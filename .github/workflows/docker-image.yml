@@ -27,7 +27,7 @@ jobs:
         push: true
         context: ./app
         tags: |
-          ${{ env.REGISTRY }}/${{ docker.repository }}/app:${{ env.RELEASE_VERSION }}
+          ${{ env.REGISTRY }}/signed-images/app:${{ env.RELEASE_VERSION }}
     - name: docker build
       run:  docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/signed-images
     - name: Docker push
