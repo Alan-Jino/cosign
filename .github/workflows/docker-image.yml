@@ -23,11 +23,7 @@ jobs:
       run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
     - name: Build image and push to Docker registry
       uses: docker/build-push-action@v4
-      with:
-        push: true
-        context: ./app
-        tags: |
-          ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
+     
     - name: docker build
       run:  docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/signed-images
     - name: Docker push
