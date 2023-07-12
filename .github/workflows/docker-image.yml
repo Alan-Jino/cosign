@@ -31,7 +31,7 @@ jobs:
       run : docker push ${{secrets.DOCKER_USER}}/signed-images
     
     - name: Install cosign
-       uses: sigstore/cosign-installer@v3.1.1
+      uses: sigstore/cosign-installer@v3.1.1
     - name: Regenerate Fulcio Token
       run: |
         curl -X POST \
