@@ -31,14 +31,21 @@ jobs:
       run : docker push ${{secrets.DOCKER_USER}}/signed-images
     
     - name: Install cosign
-      uses: sigstore/cosign-installer@v3.1.1
+       uses: sigstore/cosign-installer@v3.1.1
+    - name: Regenerate Fulcio Token
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.FULCIO_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{}' \
+          https://fulcio.sigstore.dev/api/v2/trustBundle
     - name: Sign the images
       run: |
           cosign sign -y  --fulcio-url='https://fulcio.sigstore.dev/api/v2/trustBundle' ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
       env:
         COSIGN_EXPERIMENTAL: 1
     - name: Verify the pushed tags
-      run: cosign verify ${{ env.REGISTRY }}/alanjino/signed-images/:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.DH_URL }}/alanjino/signed-images/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://oauth2.sigstore.dev/auth
+      run: cosign verify ${{ env.REGISTRY }}/alanjino/signed-images/:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.DH_URL }}/alanjino/signed-images/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://fulcio.sigstore.dev/api/v2/trustBundle
       env:
         COSIGN_EXPERIMENTAL: 1
             
