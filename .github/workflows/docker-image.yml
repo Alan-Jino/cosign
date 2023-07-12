@@ -1,40 +1,60 @@
-name: Docker Image CI
-
+name: core-release
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+    tags:
+      - "v*.*.*"
 jobs:
-
-  build:
-
-    runs-on: ubuntu-latest
-
+  push_to_registry:
+    name: Build and push Docker image github container registry.
+    runs-on: ubuntu-20.04
+    permissions:
+      packages: write
+      id-token: write
+      contents: read
+      actions: read
+      security-events: write
+    env:
+      REGISTRY: ghcr.io
+      GH_URL: https://github.com
     steps:
-    - uses: actions/checkout@v3
-     
-    - name: docker login
-      env:
-       DOCKER_USER : ${{secrets.DOCKER_USER}}
-       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-    - name: docker build
-      run:  docker build . --file Dockerfile --tag alanjino/signed-images
-    - name: Docker push
-      run : docker push ${{secrets.DOCKER_USER}}/signed-images
-    - name: cosign-installer
-  # You may pin to the exact commit or the version.
-  # uses: sigstore/cosign-installer@536b37ec5d5b543420bdfd9b744c5965bd4d8730
-      uses: sigstore/cosign-installer@v3.1.1
-    - name: write signing key to disk
-      run: 'echo "$KEY" > cosign.key'
-      shell: bash
-      env: 
-         KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      - name: Set environment variable
+        run: |
+          echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
+      - name: Test environment variable
+        run: echo ${{ env.RELEASE_VERSION }}
+      - name: Check out GitHub repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_TOKEN }}
+      - name: Build image and push to GitHub Container Registry
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          context: ./core
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}/core:${{ env.RELEASE_VERSION }}
+#      - uses: goodwithtech/dockle-action@main
+#        with:
+#          image: ${{ env.REGISTRY }}/${{ github.repository }}/core:${{ github.run_id }}
+#          format: 'list'
+#          exit-code: '1'
+#          exit-level: 'warn'
+#          ignore: 'CIS-DI-0001,DKL-DI-0006'
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
+      - name: Sign the images
+        run: |
+          cosign sign -y ${{ env.REGISTRY }}/${{ github.repository }}/core:${{ env.RELEASE_VERSION }}
+        env:
+          COSIGN_EXPERIMENTAL: 1
+      - name: Verify the pushed tags
+        run: cosign verify ${{ env.REGISTRY }}/${{ github.repository }}/core:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.GH_URL }}/${{ github.repository }}/.github/workflows/core-release.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+        env:
+          COSIGN_EXPERIMENTAL: 1
       
-    - name: sign the published docker image
-      env:
-        COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-      run: cosign sign --key cosign.key --tlog-upload=false alanjino/signed-images
