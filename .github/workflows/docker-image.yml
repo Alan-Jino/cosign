@@ -27,7 +27,7 @@ jobs:
         push: true
         context: ./app
         tags: |
-          ${{ env.REGISTRY }}/signed-images/app:${{ env.RELEASE_VERSION }}
+          ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
     - name: docker build
       run:  docker build . --file Dockerfile --tag ${{secrets.DOCKER_USER}}/signed-images
     - name: Docker push
@@ -37,11 +37,11 @@ jobs:
       uses: sigstore/cosign-installer@main
     - name: Sign the images
       run: |
-          cosign sign -y ${{ env.REGISTRY }}/signed-images/app:${{ env.RELEASE_VERSION }}
+          cosign sign -y ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
       env:
         COSIGN_EXPERIMENTAL: 1
     - name: Verify the pushed tags
-      run: cosign verify ${{ env.REGISTRY }}/signed-images/app:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.DH_URL }}/signed-images/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      run: cosign verify ${{ env.REGISTRY }}/alanjino/signed-images/:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.DH_URL }}/alanjino/signed-images/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
       env:
         COSIGN_EXPERIMENTAL: 1
             
