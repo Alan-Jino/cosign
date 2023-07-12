@@ -34,7 +34,7 @@ jobs:
       uses: sigstore/cosign-installer@v3.1.1
     - name: Sign the images
       run: |
-          cosign sign -y ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
+          cosign sign -y  --fulcio-url='https://fulcio.sigstore.dev' ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
       env:
         COSIGN_EXPERIMENTAL: 1
     - name: Verify the pushed tags
