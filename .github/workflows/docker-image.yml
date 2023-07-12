@@ -22,21 +22,21 @@ jobs:
     - name: Docker push
       run : docker push ${{secrets.DOCKER_USER}}/signed-images
     - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GIT_TOKENS }}
-     - name: Install cosign
-        uses: sigstore/cosign-installer@main
-      - name: Sign the images
-        run: |
+      uses: docker/login-action@v2.1.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GIT_TOKENS }}
+    - name: Install cosign
+      uses: sigstore/cosign-installer@main
+    - name: Sign the images
+      run: |
           cosign sign -y ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ env.RELEASE_VERSION }}
-        env:
-          COSIGN_EXPERIMENTAL: 1
-      - name: Verify the pushed tags
-        run: cosign verify ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.GH_URL }}/${{ github.repository }}/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-        env:
-          COSIGN_EXPERIMENTAL: 1
+      env:
+        COSIGN_EXPERIMENTAL: 1
+    - name: Verify the pushed tags
+      run: cosign verify ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.GH_URL }}/${{ github.repository }}/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+      env:
+        COSIGN_EXPERIMENTAL: 1
             
     
