@@ -37,4 +37,4 @@ jobs:
     - name: sign the published docker image
       env:
         COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-      run: cosign sign --key cosign.key --tlog-upload=false alanjino/signed-images
+      run: cosign sign --key cosign.key --tlog-upload=true alanjino/signed-images
