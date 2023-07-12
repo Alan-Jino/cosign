@@ -32,9 +32,16 @@ jobs:
     
     - name: Install cosign
       uses: sigstore/cosign-installer@v3.1.1
+    - name: Regenerate Fulcio Token
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer ${{ secrets.FULCIO_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{}' \
+          https://fulcio-api-endpoint/token-regeneration  
     - name: Sign the images
       run: |
-          cosign sign -y  --fulcio-url='https://oauth2.sigstore.dev/auth' ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
+          cosign sign -y ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
       env:
         COSIGN_EXPERIMENTAL: 1
     - name: Verify the pushed tags
