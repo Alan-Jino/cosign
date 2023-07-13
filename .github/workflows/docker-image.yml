@@ -40,7 +40,7 @@ jobs:
         uses: sigstore/cosign-installer@main
       - name: Sign the images
         run: |
-          cosign sign --fulcio-url='https://fulcio.sigstore.dev/api/v2/trustBundle' ${{ env.REGISTRY }}/${{ env.REPO }}
+          cosign sign --yes=false ${{ env.REGISTRY }}/${{ env.REPO }}
         env:
           COSIGN_EXPERIMENTAL: 1
       - name: Verify the pushed tags
