@@ -21,7 +21,7 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
+        username: alanjino
         password: ${{ secrets.GIT_TOKENS }}
     - name: Build image and push to Docker registry
       uses: docker/build-push-action@v4
