@@ -32,7 +32,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ env.RELEASE_VERSION }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.RELEASE_VERSION }}
 #      - uses: goodwithtech/dockle-action@main
 #        with:
 #          image: ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ github.run_id }}
