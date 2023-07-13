@@ -37,7 +37,7 @@ jobs:
 #          exit-level: 'warn'
 #          ignore: 'CIS-DI-0001,DKL-DI-0006'
       - name: Install cosign
-        uses: sigstore/cosign-installer@main
+        uses: sigstore/cosign-installer@v3.1.1
       - name: Sign the images
         run: |
           cosign sign -y ${{ env.REGISTRY }}/${{ env.REPO }}
