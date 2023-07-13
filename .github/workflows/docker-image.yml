@@ -34,11 +34,15 @@ jobs:
         tags: ${{ env.REGISTRY }}/${{ env.REPO }}
     - name: Install cosign
       uses: sigstore/cosign-installer@main
+      
     - name: Sign the images
       run: |
           cosign sign -y ${{ env.REGISTRY }}/${{ env.REPO }}
       env:
-        COSIGN_EXPERIMENTAL: 1
+        COSIGN_EXPERIMENTAL: 1 cosign sign \
+            -oidc-issuer "https://oauth2.sigstore.dev/auth" \
+            -fulcio-url "https://fulcio.sigstore.dev" \
+            -rekor-url "https://rekor.sigstore.dev" \
     - name: Verify the pushed tags
       run: cosign verify ${{ env.REGISTRY }}/${{ env.REPO }} --certificate-identity ${{ env.GH_URL }}${{ env.REPO }}/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
       env:
