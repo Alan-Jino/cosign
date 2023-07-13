@@ -20,7 +20,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       GH_URL: https://github.com
-      REPO: alan-jino/cosign
+      REPO: Alan-Jino/cosign
       
     steps:
       - name: Checkout GitHub Action
