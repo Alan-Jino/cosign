@@ -33,7 +33,7 @@ jobs:
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.REPO }}
     - name: Install cosign
-      uses: sigstore/cosign-installer@v3.1.1
+      uses: sigstore/cosign-installer@main
     - name: Sign the images
       run: |
           cosign sign -y ${{ env.REGISTRY }}/${{ env.REPO }}
@@ -43,5 +43,13 @@ jobs:
       run: cosign verify ${{ env.REGISTRY }}/${{ env.REPO }} --certificate-identity ${{ env.GH_URL }}${{ env.REPO }}/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
       env:
         COSIGN_EXPERIMENTAL: 1
+    - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        format: 'github'
+        output: 'dependency-results.sbom.json'
+        image-ref: '.'
+        github-pat: ${{ secrets.GH_TOKEN }}    
             
     
