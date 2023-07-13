@@ -32,10 +32,10 @@ jobs:
       uses: docker/build-push-action@v4
      
     - name: Build image and push to GitHub Container Registry
-        uses: docker/build-push-action@v4
-        with:
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.RELEASE_VERSION }}
+      uses: docker/build-push-action@v4
+      with:
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.RELEASE_VERSION }}
     - name: Install cosign
       uses: sigstore/cosign-installer@v3.1.1
     - name: Sign the images
