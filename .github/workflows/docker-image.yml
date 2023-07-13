@@ -27,7 +27,7 @@ jobs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GIT_TOKEN }}
+        password: ${{ secrets.GIT_TOKENS }}
     - name: Build image and push to Docker registry
       uses: docker/build-push-action@v4
      
