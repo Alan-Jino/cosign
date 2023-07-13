@@ -12,33 +12,39 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      REGISTRY: docker.io
-      DH_URL: https://hub.docker.com
-      RELEASE_VERSION: latest
+      REGISTRY: ghcr.io
+      GH_URL: https://github.com
     steps:
-    - uses: actions/checkout@v3
-    - name: docker login
-      env:
-       DOCKER_USER : ${{secrets.DOCKER_USER}}
-       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: docker login -u $DOCKER_USER -p $DOCKER_PASSWORD 
+    - name: Set environment variable
+      run: |
+        echo "RELEASE_VERSION=${GITHUB_REF:10}" >> $GITHUB_ENV
+    - name: Test environment variable
+      run: echo ${{ env.RELEASE_VERSION }}
+    - name: Check out GitHub repo
+      uses: actions/checkout@v3
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GIT_TOKEN }}
     - name: Build image and push to Docker registry
       uses: docker/build-push-action@v4
      
-    - name: docker build
-      run:  docker build . --file Dockerfile --tag alanjino/signed-images
-    - name: Docker push
-      run : docker push alanjino/signed-images
-    
+    - name: Build image and push to GitHub Container Registry
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.RELEASE_VERSION }}
     - name: Install cosign
       uses: sigstore/cosign-installer@v3.1.1
     - name: Sign the images
       run: |
-          cosign sign -y  --fulcio-url='https://fulcio.sigstore.dev/api/v2/trustBundle' ${{ env.REGISTRY }}/alanjino/signed-images:${{ env.RELEASE_VERSION }}
+          cosign sign -y ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.RELEASE_VERSION }}
       env:
         COSIGN_EXPERIMENTAL: 1
     - name: Verify the pushed tags
-      run: cosign verify ${{ env.REGISTRY }}/alanjino/signed-images/:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.DH_URL }}/alanjino/signed-images/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://fulcio.sigstore.dev/api/v2/trustBundle
+      run: cosign verify ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.RELEASE_VERSION }} --certificate-identity ${{ env.GH_URL }}${{ github.repository }}/.github/workflows/docker-image.yml@refs/tags/${{ env.RELEASE_VERSION }}  --certificate-oidc-issuer https://token.actions.githubusercontent.com
       env:
         COSIGN_EXPERIMENTAL: 1
             
