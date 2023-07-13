@@ -14,6 +14,7 @@ jobs:
     env:
       REGISTRY: ghcr.io
       GH_URL: https://github.com
+      REPO: alan-jino/cosign
     steps:
       - name: Check out GitHub repo
         uses: actions/checkout@v3
@@ -27,10 +28,10 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPO }}
 #      - uses: goodwithtech/dockle-action@main
 #        with:
-#          image: ${{ env.REGISTRY }}/${{ github.repository }}/app:${{ github.run_id }}
+#          image: ${{ env.REGISTRY }}/${{ env.REPO }}/app:${{ github.run_id }}
 #          format: 'list'
 #          exit-code: '1'
 #          exit-level: 'warn'
@@ -39,11 +40,11 @@ jobs:
         uses: sigstore/cosign-installer@main
       - name: Sign the images
         run: |
-          cosign sign -y ${{ env.REGISTRY }}/${{ github.repository }}
+          cosign sign -y ${{ env.REGISTRY }}/${{ env.REPO }}
         env:
           COSIGN_EXPERIMENTAL: 1
       - name: Verify the pushed tags
-        run: cosign verify ${{ env.REGISTRY }}/${{ github.repository }} --certificate-identity ${{ env.GH_URL }}/${{ github.repository }}/.github/workflows/docker-image.yml@refs/tags/  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+        run: cosign verify ${{ env.REGISTRY }}/${{ env.REPO }} --certificate-identity ${{ env.GH_URL }}/${{ env.REPO }}/.github/workflows/docker-image.yml@refs/tags/  --certificate-oidc-issuer https://token.actions.githubusercontent.com
         env:
           COSIGN_EXPERIMENTAL: 1
       - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
