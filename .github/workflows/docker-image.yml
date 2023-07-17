@@ -21,7 +21,6 @@ jobs:
       REGISTRY: ghcr.io
       GH_URL: https://github.com
       REPO: alanjino/cosign
-      
     steps:
       - name: Checkout GitHub Action
         uses: actions/checkout@v3
