@@ -61,13 +61,13 @@ jobs:
 #          exit-code: '1'
 #          exit-level: 'warn'
 #          ignore: 'CIS-DI-0001,DKL-DI-0006'
-      # - name: Install cosign
-      #   uses: sigstore/cosign-installer@main
-      # - name: Sign the images
-      #   run: |
-      #     cosign sign -y ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.run_id }}
-      #   env:
-      #     COSIGN_EXPERIMENTAL: 1
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
+      - name: Sign the images
+        run: |
+          cosign sign -y ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.run_id }}
+        env:
+          COSIGN_EXPERIMENTAL: 1
       # - name: Verify the pushed tags
       #   run: cosign verify ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.run_id }} --certificate-identity ${{ env.GH_URL }}/${{ github.repository }}/.github/workflows/docker-image.yml@refs/heads/main  --certificate-oidc-issuer https://token.actions.githubusercontent.com
       #   env:
