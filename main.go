@@ -12,7 +12,7 @@ func factorial(n int) int {
 }
 func main() {
 
-	fmt.Println("HELLO WORLD")
+	fmt.Println("HELLO WORLD !hai hello")
 
 	num := 5
 	result := factorial(num)
